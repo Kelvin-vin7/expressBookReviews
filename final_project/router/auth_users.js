@@ -29,7 +29,11 @@ regd_users.post("/login", (req,res) => {
   if (authenticatedUser(username, password)) {
     let accessToken = jwt.sign({ data: password }, 'access', { expiresIn: 60 * 60 });
     req.session.authorization = { accessToken, username };
-    return res.status(200).send("User successfully logged in");
+    return res.status(200).json({
+      message: "User successfully logged in",
+      username: username,
+      accessToken: accessToken
+    });
   } else {
     return res.status(208).json({ message: "Invalid Login. Check username and password" });
   }
@@ -48,9 +52,14 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     return res.status(400).json({ message: "Review text is required" });
   }
 
+  const isUpdate = Boolean(books[isbn].reviews[username]);
   books[isbn].reviews[username] = review;
   return res.status(200).json({
-    message: `The review for the book with ISBN ${isbn} has been added/updated.`,
+    message: isUpdate
+      ? `Review for the book with ISBN ${isbn} has been modified by ${username}.`
+      : `Review for the book with ISBN ${isbn} has been added by ${username}.`,
+    isbn: isbn,
+    book: books[isbn],
     reviews: books[isbn].reviews
   });
 });
@@ -69,7 +78,9 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
 
   delete books[isbn].reviews[username];
   return res.status(200).json({
-    message: `Reviews for the ISBN ${isbn} posted by the user ${username} deleted.`,
+    message: `Review for the book with ISBN ${isbn} posted by the user ${username} has been deleted.`,
+    isbn: isbn,
+    book: books[isbn],
     reviews: books[isbn].reviews
   });
 });

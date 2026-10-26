@@ -51,7 +51,7 @@ public_users.get('/author/:author', async function (req, res) {
   const getByAuthor = () => new Promise((resolve) => {
     const result = Object.keys(books)
       .filter((isbn) => books[isbn].author.toLowerCase() === author.toLowerCase())
-      .map((isbn) => ({ isbn, title: books[isbn].title, reviews: books[isbn].reviews }));
+      .map((isbn) => ({ isbn, author: books[isbn].author, title: books[isbn].title, reviews: books[isbn].reviews }));
     resolve(result);
   });
 
@@ -68,7 +68,7 @@ public_users.get('/title/:title', async function (req, res) {
   const getByTitle = () => new Promise((resolve) => {
     const result = Object.keys(books)
       .filter((isbn) => books[isbn].title.toLowerCase() === title.toLowerCase())
-      .map((isbn) => ({ isbn, author: books[isbn].author, reviews: books[isbn].reviews }));
+      .map((isbn) => ({ isbn, author: books[isbn].author, title: books[isbn].title, reviews: books[isbn].reviews }));
     resolve(result);
   });
 
