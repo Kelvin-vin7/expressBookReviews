@@ -89,57 +89,73 @@ public_users.get('/review/:isbn',function (req, res) {
 });
 
 /*
- * Task 10-13: Client functions that use Axios with Promise callbacks
- * and async/await to retrieve the books from the server endpoints above.
+ * Tasks 10-13: Retrieve books using Axios with async/await and Promise callbacks.
+ * Each helper calls the book endpoints above through Axios, and each one is
+ * exposed through its own route so it can be tested with curl.
  */
 
-// Task 10: Get all books - using async/await with Axios
+// Task 10: Get the list of all books - async/await with Axios
 const getAllBooks = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/`);
-    console.log("All books:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching all books:", error.message);
-  }
+  const response = await axios.get(`${BASE_URL}/`);
+  return response.data;
 };
 
-// Task 11: Get book details based on ISBN - using Promise callbacks with Axios
+// Task 11: Get book details based on ISBN - Promise callbacks with Axios
 const getBookByISBN = (isbn) => {
-  return axios
-    .get(`${BASE_URL}/isbn/${isbn}`)
-    .then((response) => {
-      console.log(`Book with ISBN ${isbn}:`, response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error(`Error fetching book with ISBN ${isbn}:`, error.message);
-    });
+  return axios.get(`${BASE_URL}/isbn/${isbn}`).then((response) => response.data);
 };
 
-// Task 12: Get book details based on author - using async/await with Axios
+// Task 12: Get book details based on author - async/await with Axios
 const getBooksByAuthor = async (author) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/author/${encodeURIComponent(author)}`);
-    console.log(`Books by ${author}:`, response.data);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching books by ${author}:`, error.message);
-  }
+  const response = await axios.get(`${BASE_URL}/author/${encodeURIComponent(author)}`);
+  return response.data;
 };
 
-// Task 13: Get book details based on title - using Promise callbacks with Axios
+// Task 13: Get book details based on title - Promise callbacks with Axios
 const getBooksByTitle = (title) => {
-  return axios
-    .get(`${BASE_URL}/title/${encodeURIComponent(title)}`)
-    .then((response) => {
-      console.log(`Books with title ${title}:`, response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error(`Error fetching books with title ${title}:`, error.message);
-    });
+  return axios.get(`${BASE_URL}/title/${encodeURIComponent(title)}`).then((response) => response.data);
 };
+
+// Route for Task 10: all books using async/await with Axios
+public_users.get('/async/books', async (req, res) => {
+  try {
+    const data = await getAllBooks();
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ message: "Error retrieving books", error: error.message });
+  }
+});
+
+// Route for Task 11: book by ISBN using Promise callbacks with Axios
+public_users.get('/async/isbn/:isbn', (req, res) => {
+  getBookByISBN(req.params.isbn)
+    .then((data) => res.status(200).json(data))
+    .catch((error) => {
+      const status = error.response ? error.response.status : 500;
+      res.status(status).json({ message: `Error retrieving book with ISBN ${req.params.isbn}` });
+    });
+});
+
+// Route for Task 12: books by author using async/await with Axios
+public_users.get('/async/author/:author', async (req, res) => {
+  try {
+    const data = await getBooksByAuthor(req.params.author);
+    return res.status(200).json(data);
+  } catch (error) {
+    const status = error.response ? error.response.status : 500;
+    return res.status(status).json({ message: `Error retrieving books by author ${req.params.author}` });
+  }
+});
+
+// Route for Task 13: books by title using Promise callbacks with Axios
+public_users.get('/async/title/:title', (req, res) => {
+  getBooksByTitle(req.params.title)
+    .then((data) => res.status(200).json(data))
+    .catch((error) => {
+      const status = error.response ? error.response.status : 500;
+      res.status(status).json({ message: `Error retrieving books with title ${req.params.title}` });
+    });
+});
 
 module.exports.general = public_users;
 module.exports.getAllBooks = getAllBooks;
